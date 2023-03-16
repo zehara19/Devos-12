@@ -1,8 +1,10 @@
-FROM centos:7
-COPY . /reactapp
-WORKDIR /reactapp
-RUN curl -fsSL https://rpm.nodesource.com/setup_16.x | bash -
-RUN yum install nodejs -y
-RUN npm i react-scripts
+FROM node:16-alpine as build
+WORKDIR /rohithbuildapp
+COPY package*.json /rohithbuildapp/
+RUN npm install
+COPY . .
+RUN npm run build
+FROM nginx:latest
+COPY --from=build /rohithbuildapp/build/ /usr/share/nginx/html/
 EXPOSE 80
-ENTRYPOINT ["npm","start"]
+CMD ["nginx", "-g", "daemon off;"]
